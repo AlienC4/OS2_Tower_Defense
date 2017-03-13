@@ -6,11 +6,15 @@ case class Vector2D(x: Double, y: Double) {
   
   /** Gives the length of this vector */
   def r = hypot(x, y)
+  def length(v: Vector2D) = v.r
   /** Gives the signed angle between this vector and the x-axis */
   def theta = atan2(y, x)
+  def angle(v: Vector2D) = v.theta
   
   /** Adds two Vectors together */
   def +(v: Vector2D) = Vector2D(x + v.x, y + v.y)
+  /** Substacts the given Vector from this */
+  def -(v: Vector2D) = Vector2D(x - v.x, y - v.y)
   /** Multiplies the components of this vector by a given value, effectively strecting the vector */
   def *(m: Double) = m * this
   /** Divides the components of this vector by a given value, effectively shrinking the vector */
@@ -18,6 +22,7 @@ case class Vector2D(x: Double, y: Double) {
   
   /** Gives a vector that has the same heading as this but has a length of 1 */
   def unit = this / r
+  def normalize(v: Vector2D) = v.unit
   
   
   implicit class mult(m: Double) {
