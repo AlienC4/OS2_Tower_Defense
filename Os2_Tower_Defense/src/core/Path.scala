@@ -1,9 +1,14 @@
 package core
 
-case class Path(private var path: Vector[Coords]) {
+case class Path(private var path: Vector[Vector2D]) {
   
-  def addNode(c: Coords) = this.path ++= Vector(c)
+  def addNode(c: Vector2D) = this.path ++= Vector(c)
+  def addNode(c: Vector2D*) = this.path ++= c.toVector
+  
+  def apply(n: Int) = path(n)
   
   def getPath = this.path
+  
+  def length = this.path.length
   
 }
