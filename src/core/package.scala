@@ -33,7 +33,7 @@ package object core {
         
         for (chunk <- chunked) {
           
-          val name = chunk(0).toLowerCase
+          val name = chunk(0).toLowerCase().trim()
           name match {
             case "info" => {
               for (line <- chunk if (line.trim.nonEmpty)) {
@@ -41,7 +41,9 @@ package object core {
               }
             }
             case "waves" => {
-              
+              for (line <- chunk if (line.trim.nonEmpty)) {
+                
+              }
             }
             case _ =>
           }
