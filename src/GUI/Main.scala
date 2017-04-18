@@ -9,6 +9,10 @@ object Main extends SimpleSwingApplication {
   val width = 1000
   val height = 800
   val fullHeight = 810
+  val squareSize = 20
+  val colCount = width / squareSize
+  val rowCount = height / squareSize
+  private var cells: List[Rectangle] = List()
   
   
   def top = new MainFrame {
@@ -19,6 +23,8 @@ object Main extends SimpleSwingApplication {
     minimumSize = new Dimension(width, fullHeight)
     preferredSize = new Dimension(width, fullHeight)
     maximumSize = new Dimension(width, fullHeight)
+    
+    val grid = 5
     
     
   }
