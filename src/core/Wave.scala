@@ -5,6 +5,7 @@ case class Wave(private var enemies: Vector[Enemy]) {
   def addEnemy(enemy: Enemy*) = enemies ++= enemy
   
   def setPaths(path: Path) = enemies.map(_.setPath(path))
+  def setPositions(pos: Vector2D) = enemies.map(_.pos = pos) 
   
   def isDone = enemies.forall(_.dead)
 }
