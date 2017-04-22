@@ -11,4 +11,6 @@ case class Path(private var path: Vector[Vector2D]) {
   
   def length = this.path.length
   
+  override def toString = this.path.toString()
+  
 }
