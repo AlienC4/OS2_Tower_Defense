@@ -15,11 +15,12 @@ object Main extends PApplet {
   val enemy1 = loadEnemy("type1")
   val pic1 = loadImage("enemies/Enemy1.png")
   pic1.resize(32, 0)
-  println(level1.getWave(0))
+
   def cw = level1.currentWave
-//  enemy1.setPath(level1.path)
-//
-//  enemy1.pos = level1.path(0).offset(0, -math.random * 10)
+  for (i <- 0 until cw.size) {
+    cw(i).setPos(cw(i).getPos.offset(0, 10 * (i + 1)))
+  }
+//  level1.getWave(0).getEnemies.foreach(e => println(e.getPos))
 
   val side = 32
   val off = 0.5f
@@ -42,15 +43,15 @@ object Main extends PApplet {
   override def draw(): Unit = {
     image(bg, 0, 0)
     drawGrid(h, w, side, off)
-    cw.getEnemies.foreach { e =>
-      rot(e)
-      imageMode(CENTER)
-      image(pic1, e.x, e.y)
-      imageMode(CORNER)
+    cw.getEnemies.foreach { e => 
+      rot(e) 
+      drawHealth(e)
     }
-
-    if (millis() >= 5000)
+    
+    if (millis() >= 5000) {
       cw.getEnemies.foreach(e => e.move)
+    }
+      
   }
 
   /** Rotates the given enemy around it's center point */
@@ -59,13 +60,31 @@ object Main extends PApplet {
     rotate((e.speed.theta + Pi).toFloat)
     rotate(Pi.toFloat)
     translate(-e.x, -e.y)
+    imageMode(CENTER)
+    image(pic1, e.x, e.y)
+    imageMode(CORNER)
+    translate(e.x, e.y)
+    rotate(-(e.speed.theta + 2*Pi).toFloat)
+    translate(-e.x, -e.y)
+  }
+  
+  private def drawHealth(e: Enemy) = {
+    val hb = new HealthBar(e.health, e.initHealth, e.x - 16, e.y - 32, side.toFloat, 10f)
+    val curHealth = (hb.value / hb.max * hb.w).toFloat
+    if (hb.value < hb.max) {
+      fill(255, 0, 0)
+      stroke(0)
+      rect(hb.x, hb.y, hb.w, hb.h)
+      fill(0, 255, 0)
+      rect(hb.x, hb.y, curHealth, hb.h)
+    }
   }
 
   override def mouseClicked(): Unit = {
     val mx = (mouseX / side + off) * side
     val my = (mouseY / side + off) * side
-    //    Console.print(s"$mx, $my; ")
-    Console.print(s"$mouseX, $mouseY; ")
+        Console.print(s"$mx, $my; ")
+//    Console.print(s"$mouseX, $mouseY; ")
   }
 
   def main(args: Array[String]) {
@@ -81,4 +100,7 @@ object Main extends PApplet {
     frame.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE)
   }
 
+}
+
+case class HealthBar(value: Double, max: Double, x: Float, y: Float, w: Float, h: Float) {
 }
