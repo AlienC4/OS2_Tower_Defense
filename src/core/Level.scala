@@ -12,6 +12,8 @@ case class Level(path: Path) {
   def currentWave = getWave(c)
   def nextWave = c += 1
   
+  def isDone = waves.forall(w => w.isDone)
+  
   def getWave(n: Int) = waves(n)
   def apply(n: Int) = getWave(n)
   
