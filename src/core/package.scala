@@ -9,7 +9,7 @@ package object core {
     var path: Path = Path(Vector())
     val nodes: Buffer[Vector2D] = Buffer()
     val waves: Buffer[Wave] = Buffer()
-    val enemies: collection.Map[String, Enemy] = 
+    def enemies = 
       collection.Map("type1" -> loadEnemy("type1"), 
                      "type2" -> loadEnemy("type2"),
                      "type3" -> loadEnemy("type3")) // only three possible enemy types currently
@@ -28,7 +28,7 @@ package object core {
             b += currentLine
           }
           b -= null
-          b.mkString("\n")
+          b.map(_.takeWhile(_ != "§")).mkString("\n")
         }
         
         val chunked = wholeFile.split("#").drop(1).map(_.split("\n"))
@@ -55,9 +55,9 @@ package object core {
             case "waves" => {
               for (line <- chunk if (line.trim.nonEmpty)) {
                 val cleaned = line.split(":").map(_.trim.toLowerCase)
-                cleaned(0) match {
+                cleaned(0).takeWhile(_ != ' ') match {
                   case "wave" => {
-                    val types = cleaned(1).split(";").map(_.split(",")).map(x => (x(0), x(1).toInt))
+                    val types = cleaned(1).split(";").map(_.trim.split(",")).map(x => (x(0).trim, x(1).trim.toInt))
                     var wave = Vector[Enemy]()
                     types.foreach(t => wave ++= Vector.fill(t._2)(enemies(t._1)))
                     waves += Wave(wave)
@@ -73,7 +73,8 @@ package object core {
         waves.foreach{w => 
           l.addWave(w)
           w.setPaths(path)
-          w.setPositions(path(0).offset(0, math.random * 100))
+          w.setPositions(path(0))
+//          w.getEnemies.foreach(e => e.pos = e.pos.offset(0, math.random * 10))
         }
         l
         
@@ -93,7 +94,7 @@ package object core {
     
     var health = 0
     var speed = Vector2D(0, 0)
-    var maxSpeed = 0
+    var maxSpeed = 0.0
     
     try {
       val file = new FileReader(s"enemies/$enemyType.enemy")
@@ -121,15 +122,14 @@ package object core {
             case "enemy type" => 0
             case "health" => health = parts(1).toInt
             case "speed" => {
-              val s = parts(1).split(",").map(_.trim.toInt)
+              val s = parts(1).split(",").map(_.trim.toDouble)
               speed = Vector2D(s(0), s(1))
             }
-            case "maxspeed" => maxSpeed = parts(1).toInt
+            case "maxspeed" => maxSpeed = parts(1).toDouble
             case _ => 
           }
         }
-        
-        val e = Enemy(health, speed)
+        val e = new Enemy(health, speed, Vector2D(0, math.random))
         e.setMaxSpeed(maxSpeed)
         e
         
