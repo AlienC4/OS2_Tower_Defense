@@ -1,4 +1,4 @@
 Enemy type: type3
 Health: 200
-Speed: 10, 0
-MaxSpeed: 10
+Speed: 1, 0
+MaxSpeed: 1
