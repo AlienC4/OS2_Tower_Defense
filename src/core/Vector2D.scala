@@ -7,8 +7,8 @@ case class Vector2D(x: Double, y: Double) {
   /** Gives the length of this vector */
   def r = hypot(x, y)
   def length(v: Vector2D) = v.r
-  /** Gives the signed angle between this vector and the x-axis in degrees*/
-  def theta = atan2(y, x).toDegrees
+  /** Gives the signed angle between this vector and the x-axis in radians*/
+  def theta = atan2(y, x)
   def angle(v: Vector2D) = v.theta
   
   /** Adds two Vectors together */
