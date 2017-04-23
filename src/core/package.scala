@@ -70,12 +70,11 @@ package object core {
           }
         }
         val l = Level(path)
-        waves.foreach(w => l.addWave(w))
-        waves.foreach { w => 
+        waves.foreach{w => 
+          l.addWave(w)
           w.setPaths(path)
-          w.setPositions(path(0))
-          }
-        
+          w.setPositions(path(0).offset(0, math.random * 100))
+        }
         l
         
       } finally {
