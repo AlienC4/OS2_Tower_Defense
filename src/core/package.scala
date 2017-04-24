@@ -3,7 +3,11 @@ import java.io._
 import scala.collection.mutable.Buffer
 
 package object core {
-
+  
+  /**
+   *  Loads the level given as parameter from the corresponding file
+   *  @param level: the level number of the level to be loaded
+   */
   def loadLevel(level: Int): Level = {
     
     var path: Path = Path(Vector())
@@ -90,6 +94,10 @@ package object core {
 
   }
   
+  /**
+   *  Loads the enemy given as parameter from the corresponding file
+   *  @param enemyType: the type of the enemy to be loaded
+   */
   def loadEnemy(enemyType: String): Enemy = {
     
     var health = 0
@@ -111,7 +119,7 @@ package object core {
             b += currentLine
           }
           b -= null
-          b.mkString("\n")
+          b.map(_.takeWhile(_ != "§")).mkString("\n")
         }
         
         val lines = wholeFile.split("\n")
@@ -142,6 +150,60 @@ package object core {
       case e: FileNotFoundException => throw new CorruptedTDFileException(s"File missing: $enemyType.enemy")
       case e: IOException           => throw new CorruptedTDFileException("Read error.")
     }
+    
+  }
+  
+  /** 
+   *  Loads the tower's attributes from the corresponding file
+   *  @param tower: the type of the tower to be loaded
+   */
+  def loadTower(tower: String) = {
+    
+  var range = 0.0
+  var damage = 0.0
+  var rof = 0.0
+    
+    try {
+      val file = new FileReader(s"towers/$tower.tower")
+      val reader = new BufferedReader(file)
+
+      try {
+
+        var currentLine = reader.readLine()
+
+        val wholeFile = {
+          val b = Buffer[String]()
+          while (currentLine != null) {
+            currentLine = reader.readLine()
+            b += currentLine
+          }
+          b -= null
+          b.map(_.takeWhile(_ != "§")).mkString("\n")
+        }
+        
+        val lines = wholeFile.split("\n")
+        
+        for (line <- lines if (line.trim.nonEmpty)) {
+          val parts = line.split(":").map(_.trim.toLowerCase())
+          parts(0) match {
+            case "range" => range = parts(1).toDouble
+            case "damage" => damage = parts(1).toDouble
+            case "rof" => rof = parts(1).toDouble
+            case _ =>
+          }
+        }
+        
+        (range, damage, rof)
+      } finally {
+        file.close()
+        reader.close()
+      }
+
+    } catch {
+      case e: FileNotFoundException => throw new CorruptedTDFileException(s"File missing: $tower.tower")
+      case e: IOException           => throw new CorruptedTDFileException("Read error.")
+    }
+    
   }
   
   def trunc(v: Vector2D, s: Double): Vector2D = if (v.r > s) v.unit * s else v
