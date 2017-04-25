@@ -137,7 +137,7 @@ package object core {
             case _ => 
           }
         }
-        val e = new Enemy(health, speed, Vector2D(0, math.random))
+        val e = new Enemy(health, speed, Vector2D(0, math.random), enemyType)
         e.setMaxSpeed(maxSpeed)
         e
         
