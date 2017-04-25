@@ -1,10 +1,10 @@
 package core
 
-case class Enemy(initHealth: Double, var speed: Vector2D, var pos: Vector2D) {
+case class Enemy(initHealth: Double, var speed: Vector2D, var pos: Vector2D, etype: String) {
 
   private[this] var path: Path = null
   private[this] var currentNode: Int = 0
-  private val distance = 5
+  private val distance = 8
   private[this] var maxSpeed: Double = 1.0
 
   var health = initHealth
