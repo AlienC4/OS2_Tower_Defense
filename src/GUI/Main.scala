@@ -10,36 +10,21 @@ object Main extends PApplet {
 
   val w = 1280
   val h = 800
+  
+  /* Loading pictures and the current level */
   val bg = loadImage("levels/Level1.png")
-  val level1 = loadLevel(1)
-  val enemy1 = loadEnemy("type1")
   val pic1 = loadImage("enemies/Enemy1.png")
-  val tower1 = loadTower("basic")
+  val pic2 = loadImage("enemies/Enemy2.png")
+  val pic3 = loadImage("enemies/Enemy3.png")
+  val pics = collection.Map("type1" -> pic1, "type2" -> pic2, "type3" -> pic3)
   val base = loadImage("towers/Tower.png")
   val turret = loadImage("towers/Turret.png")
-  pic1.resize(32, 0)
-  val towerPos = Buffer[(Int, Int)]()
-  val towers = Buffer[Tower]()
-  var showRanges = false
-
-  def cw = level1.currentWave
   
-  for (i <- 0 until cw.size) {
-    cw(i).setPos(cw(i).getPos.offset(0, 10 * (i + 1)))
-  }
+  spread
 
   val side = 32
   val off = 0.5f
 
-  def drawGrid(hei: Int, wid: Int, size: Int, offset: Float) {
-    stroke(0, 0, 0)
-    for (i <- 1 to hei / size) {
-      line(0, (i - offset) * size, w, (i - offset) * size)
-    }
-    for (i <- 1 to wid / size) {
-      line((i - offset) * size, 0, (i - offset) * size, h)
-    }
-  }
 
   override def setup(): Unit = {
     size(w, h)
@@ -49,18 +34,36 @@ object Main extends PApplet {
   override def draw(): Unit = {
     image(bg, 0, 0)
     drawGrid(h, w, side, off)
-    cw.getEnemies.foreach { e => 
+    cw.getEnemies.filter(_.alive).foreach { e => 
       rot(e) 
       drawHealth(e)
     }
     towers.foreach { t =>
+      drawRange(t)
       rot(t)
     }
     if (millis() >= 5000) {
       cw.getEnemies.foreach(e => e.move)
-      towers.foreach(t => t.shoot)
+      towers.foreach(t => if (t.shoot != 0.0) line(t.x, t.y, t.lastTarget.x.toFloat, t.lastTarget.y.toFloat))
+      if (cw.isDone && level1.hasNext) {
+        level1.nextWave
+        spread
+      }
     }
-      
+  }
+  
+  override def mouseClicked(): Unit = {
+    // mx and my give the coordinates of the nearest point on the grid
+    val mx = (mouseX / side + off) * side
+    val my = (mouseY / side + off) * side
+    val pos = Vector2D(mx, my)
+    val p = (mx.toInt, my.toInt)
+    if (!towerPos.contains(p)) {
+      towerPos += p
+      towers += placeTower(pos, "basic")
+    }
+//    Console.print(s"$mx, $my; ")
+//    Console.print(s"$mouseX, $mouseY; ")
   }
 
   /** Rotates the given enemy around it's center point */
@@ -70,7 +73,7 @@ object Main extends PApplet {
     rotate(Pi.toFloat)
     translate(-e.x, -e.y)
     imageMode(CENTER)
-    image(pic1, e.x, e.y)
+    image(pics(e.etype), e.x, e.y)
     imageMode(CORNER)
     translate(e.x, e.y)
     rotate(-(e.speed.theta + 2 * Pi).toFloat)
@@ -91,10 +94,20 @@ object Main extends PApplet {
     translate(-t.x, -t.y)
   }
   
+  def drawGrid(hei: Int, wid: Int, size: Int, offset: Float) {
+    stroke(0, 0, 0)
+    for (i <- 1 to hei / size) {
+      line(0, (i - offset) * size, w, (i - offset) * size)
+    }
+    for (i <- 1 to wid / size) {
+      line((i - offset) * size, 0, (i - offset) * size, h)
+    }
+  }
+  
   private def drawHealth(e: Enemy) = {
     val hb = new HealthBar(e.health, e.initHealth, e.x - 16, e.y - 32, side.toFloat, 10f)
     val curHealth = (hb.value / hb.max * hb.w).toFloat
-    if (hb.value < hb.max) {
+    if (hb.value < hb.max && showHealth) {
       fill(255, 0, 0)
       stroke(0)
       rect(hb.x, hb.y, hb.w, hb.h)
@@ -102,27 +115,21 @@ object Main extends PApplet {
       rect(hb.x, hb.y, curHealth, hb.h)
     }
   }
-
-  override def mouseClicked(): Unit = {
-    val mx = (mouseX / side + off) * side
-    val my = (mouseY / side + off) * side
-    val pos = Vector2D(mx, my)
-    val p = (mx.toInt, my.toInt)
-    if (!towerPos.contains(p)) {
-      towerPos += p
-      towers += placeTower(pos, "basic")
+  
+  def drawRange(t: Tower) = {
+    if (showRanges) {
+      fill(150, 0, 0, 50)
+      ellipseMode(RADIUS)
+      ellipse(t.x, t.y, t.r, t.r)
     }
-//    Console.print(s"$mx, $my; ")
-//    Console.print(s"$mouseX, $mouseY; ")
   }
+
   
   
-  def placeTower(pos: Vector2D, tower: String) = {
-    val (range, damage, rof) = loadTower(tower)
-    val t = new Tower(pos, range, damage, rof)
-    t.level = level1
-    t
-  }
+  
+  
+  
+
 
   def main(args: Array[String]) {
     val frame = new javax.swing.JFrame("Super Awesome Tower Defense")
@@ -139,4 +146,3 @@ object Main extends PApplet {
 
 }
 
-case class HealthBar(value: Double, max: Double, x: Float, y: Float, w: Float, h: Float)
