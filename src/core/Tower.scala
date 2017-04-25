@@ -10,7 +10,7 @@ package core
 case class Tower(pos: Vector2D, var range: Double, var damage: Double, var rof: Double) {
   
   private var lastShot = System.currentTimeMillis() // Initially the time when the tower was created
-  private var lastTarget: Vector2D = Vector2D(0, 0)
+  var lastTarget: Vector2D = Vector2D(0, 0)
   /** Time between shots, in milliseconds */
   private def tbs = 1 / rof * 1000
   var level: Level = null
@@ -46,6 +46,7 @@ case class Tower(pos: Vector2D, var range: Double, var damage: Double, var rof: 
   
   def x = this.pos.x.toFloat
   def y = this.pos.y.toFloat
+  def r = this.range.toFloat
   def theta = (lastTarget - this.pos).theta.toFloat
   
 }
