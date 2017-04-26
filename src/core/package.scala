@@ -13,10 +13,11 @@ package object core {
     var path: Path = Path(Vector())
     val nodes: Buffer[Vector2D] = Buffer()
     val waves: Buffer[Wave] = Buffer()
-    def enemies = 
-      collection.Map("type1" -> loadEnemy("type1"), 
-                     "type2" -> loadEnemy("type2"),
-                     "type3" -> loadEnemy("type3")) // only three possible enemy types currently
+    var money = 0
+    var lives = 0
+    def enemies = Map("type1" -> loadEnemy("type1"), 
+                      "type2" -> loadEnemy("type2"),
+                      "type3" -> loadEnemy("type3")) // only three possible enemy types currently
 
     try {
       val file = new FileReader(s"levels/$level.level")
@@ -50,8 +51,9 @@ package object core {
                     for (c <- coords) {
                       nodes += Vector2D(c(0), c(1))
                     }
-                    path = Path(nodes.toVector)
                   }
+                  case "money" => money = cleaned(1).toInt
+                  case "lives" => lives = cleaned(1).toInt
                   case _ =>
                 }
               }
@@ -73,7 +75,8 @@ package object core {
             case _ =>
           }
         }
-        val l = Level(path)
+        path = Path(nodes.toVector)
+        val l = Level(level, money, lives, path)
         waves.foreach{w => 
           l.addWave(w)
           w.setPaths(path)
@@ -103,6 +106,8 @@ package object core {
     var health = 0
     var speed = Vector2D(0, 0)
     var maxSpeed = 0.0
+    var moneyw = 0
+    var livesw = 0
     
     try {
       val file = new FileReader(s"enemies/$enemyType.enemy")
@@ -134,10 +139,12 @@ package object core {
               speed = Vector2D(s(0), s(1))
             }
             case "maxspeed" => maxSpeed = parts(1).toDouble
+            case "money" => moneyw = parts(1).toInt
+            case "lives" => livesw = parts(1).toInt
             case _ => 
           }
         }
-        val e = new Enemy(health, speed, Vector2D(0, math.random), enemyType)
+        val e = new Enemy(health, speed, Vector2D(0, math.random), moneyw, livesw, enemyType)
         e.setMaxSpeed(maxSpeed)
         e
         
@@ -162,6 +169,7 @@ package object core {
   var range = 0.0
   var damage = 0.0
   var rof = 0.0
+  var cost = 0
     
     try {
       val file = new FileReader(s"towers/$tower.tower")
@@ -189,11 +197,12 @@ package object core {
             case "range" => range = parts(1).toDouble
             case "damage" => damage = parts(1).toDouble
             case "rof" => rof = parts(1).toDouble
+            case "cost" => cost = parts(1).toInt
             case _ =>
           }
         }
         
-        (range, damage, rof)
+        (cost, range, damage, rof)
       } finally {
         file.close()
         reader.close()
