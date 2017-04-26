@@ -1,4 +1,6 @@
 Enemy type: type1
-Health: 200
-Speed: 0, -1
+Health: 400
+Speed: 0, -0.01
+Money: 10
+Lives: 1
 MaxSpeed: 1

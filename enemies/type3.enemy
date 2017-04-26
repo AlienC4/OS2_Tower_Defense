@@ -1,4 +1,6 @@
 Enemy type: type3
-Health: 200
-Speed: 0, -1
-MaxSpeed: 1
+Health: 8000
+Speed: 0, -0.01
+Money: 200
+Lives: 5
+MaxSpeed: 0.6
