@@ -27,6 +27,8 @@ case class Vector2D(x: Double, y: Double) {
   
   def offset(ox: Double, oy: Double) = this + Vector2D(ox, oy)
   
+  def isWithin(radius: Double, that: Vector2D) = (this - that).r <= radius
+  
   
   implicit class mult(m: Double) {
      def ^(a: Double) = pow(m, a)
