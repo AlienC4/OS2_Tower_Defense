@@ -8,6 +8,7 @@ import scala.collection.mutable.Buffer
 
 object Main extends PApplet {
 
+  /* Setting up some constants */
   private val w = 1280
   private val h = 800
   private val side = 32
@@ -29,18 +30,20 @@ object Main extends PApplet {
   private val heart = loadImage("etc/heart.png")
   coin.resize(32, 0)
 
-  spread
+  spread // spreading out the first wave of enemies
 
+  /* Adding some buttons */
   private val button1 = Button("Level 1", 640, 400, 80, 32)
   private val button2 = Button("Level 2", 640, 450, 80, 32)
   private val button3 = Button("Level 3", 640, 500, 80, 32)
   
-
+  /* Sets the size of the window and set the framerate */
   override def setup(): Unit = {
     size(w, h)
     frameRate(60) //60 fps MR
   }
 
+  /* Handles drawing stuff in the windows */
   override def draw(): Unit = {
     if (!paused && !gameOver) {
       drawLevel(cl)
@@ -59,6 +62,7 @@ object Main extends PApplet {
     }
   }
 
+  /* Handles mouse clicks */
   override def mouseClicked(): Unit = {
     // mx and my give the coordinates of the nearest grid intersection
     val mx = (mouseX / side + off) * side
@@ -97,6 +101,9 @@ object Main extends PApplet {
     }
   }
 
+  /** 
+   *  Handles drawing levels
+   */
   private def drawLevel(level: Int) {
     image(levelbgs(level), 0, 0)
     drawGrid(h, w, side, off)
@@ -142,6 +149,9 @@ object Main extends PApplet {
     drawInfo
   }
   
+  /**
+   *  Handles drawing the current amount of money and lives
+   */
   private def drawInfo = {
     image(coin, 17, 16)
     image(heart, 17, 48)
@@ -153,6 +163,9 @@ object Main extends PApplet {
     text(player.lives, 50, 48)
   }
   
+  /**
+   *  Handles drawing the info for a given tower
+   */
   private def drawTowerInfo(t: Tower) = {
     textAlign(RIGHT, TOP)
     textSize(20)
@@ -164,37 +177,43 @@ object Main extends PApplet {
 
   /** Rotates the given enemy around it's center point */
   private def rot(e: Enemy): Unit = {
-    translate(e.x, e.y)
-    rotate((e.speed.theta).toFloat)
+    translate(e.x, e.y) // Translates the origin to the center of the enemy
+    rotate((e.speed.theta).toFloat) // Rotates around that point
     imageMode(CENTER)
-    image(pics(e.etype), 0, 0)
+    image(pics(e.etype), 0, 0) // Draws the enemy
     imageMode(CORNER)
-    rotate(-(e.speed.theta).toFloat)
-    translate(-e.x, -e.y)
+    rotate(-(e.speed.theta).toFloat) // Rotates back to normal
+    translate(-e.x, -e.y) // Translates the origin back to normal
   }
 
   private def rot(t: Tower): Unit = {
     imageMode(CENTER)
-    image(base, t.x, t.y)
-    translate(t.x, t.y)
-    rotate(t.theta)
-    rotate((Pi / 2).toFloat)
-    image(turret, 0, 0)
+    image(base, t.x, t.y) // Draws the base of the tower
+    translate(t.x, t.y) // Translates the origin to the center of the tower
+    rotate(t.theta) // Rotates around that point
+    rotate((Pi / 2).toFloat) // some more
+    image(turret, 0, 0) // Draws the turret part of the tower
     imageMode(CORNER)
-    rotate(-(t.theta + (Pi / 2).toFloat))
-    translate(-t.x, -t.y)
+    rotate(-(t.theta + (Pi / 2).toFloat)) // Rotates back
+    translate(-t.x, -t.y) // Translates the origin back to normal
   }
 
+  /** 
+   *  Draws a grid with the given parameters
+   */
   private def drawGrid(hei: Int, wid: Int, size: Int, offset: Float) {
     stroke(0, 0, 0)
     for (i <- 1 to hei / size) {
-      line(0, (i - offset) * size, w, (i - offset) * size)
+      line(0, (i - offset) * size, wid, (i - offset) * size)
     }
     for (i <- 1 to wid / size) {
-      line((i - offset) * size, 0, (i - offset) * size, h)
+      line((i - offset) * size, 0, (i - offset) * size, hei)
     }
   }
 
+  /**
+   *  Draws the healthbar for the given enemy
+   */
   private def drawHealth(e: Enemy) = {
     val hb = new HealthBar(e.health, e.initHealth, e.x - 16, e.y - 32, side.toFloat, 10f)
     val curHealth = (hb.value / hb.max * hb.w).toFloat
@@ -207,6 +226,9 @@ object Main extends PApplet {
     }
   }
 
+  /**
+   *  Draws the range for the given enemy
+   */
   private def drawRange(t: Tower) = {
     if (showRanges || selectedTower == t) {
       fill(150, 0, 0, 20)
@@ -215,6 +237,9 @@ object Main extends PApplet {
     }
   }
 
+  /*
+   *  A class representing buttons
+   */
   case class Button(label: String, x: Float, y: Float, w: Float, h: Float) {
     def mouseIsOver = mouseX > x && mouseX < (x + w) && mouseY > y && mouseY < (y + h)
     def draw() {
@@ -228,6 +253,9 @@ object Main extends PApplet {
     }
   }
 
+  /* 
+   * Creates the window
+   */
   def main(args: Array[String]) {
     val frame = new javax.swing.JFrame("Super Awesome Tower Defense")
 
