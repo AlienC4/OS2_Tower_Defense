@@ -1,11 +1,9 @@
 package core
 
 case class Player(var money: Int, var lives: Int) {
-  private val initMoney = money
-  private val initLives = lives
   
-  def reload() = {
-    money = initMoney
-    lives = initLives
+  def reload(level: Level) = {
+    money = level.money
+    lives = level.lives
   }
 }
