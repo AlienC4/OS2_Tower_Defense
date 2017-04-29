@@ -8,32 +8,32 @@ import scala.collection.mutable.Buffer
 
 object Main extends PApplet {
 
-  val w = 1280
-  val h = 800
-  val side = 32
-  val off = 0.5f
-  var clicks = 0
+  private val w = 1280
+  private val h = 800
+  private val side = 32
+  private val off = 0.5f
+  private var clicks = 0
   
   /* Loading pictures for the enemies, turrets */
-  val level1bg = loadImage("levels/Level1.png")
-  val level2bg = loadImage("levels/Level2.png")
-  val level3bg = loadImage("levels/Level3.png")
-  val levelbgs = Map(1 -> level1bg, 2 -> level2bg, 3 -> level3bg)
-  val pic1 = loadImage("enemies/Enemy1.png")
-  val pic2 = loadImage("enemies/Enemy2.png")
-  val pic3 = loadImage("enemies/Enemy3.png")
-  val pics = Map("type1" -> pic1, "type2" -> pic2, "type3" -> pic3)
-  val base = loadImage("towers/Tower.png")
-  val turret = loadImage("towers/Turret.png")
-  val coin = loadImage("etc/coin.png")
-  val heart = loadImage("etc/heart.png")
+  private val level1bg = loadImage("levels/Level1.png")
+  private val level2bg = loadImage("levels/Level2.png")
+  private val level3bg = loadImage("levels/Level3.png")
+  private val levelbgs = Map(1 -> level1bg, 2 -> level2bg, 3 -> level3bg)
+  private val pic1 = loadImage("enemies/Enemy1.png")
+  private val pic2 = loadImage("enemies/Enemy2.png")
+  private val pic3 = loadImage("enemies/Enemy3.png")
+  private val pics = Map("type1" -> pic1, "type2" -> pic2, "type3" -> pic3)
+  private val base = loadImage("towers/Tower.png")
+  private val turret = loadImage("towers/Turret.png")
+  private val coin = loadImage("etc/coin.png")
+  private val heart = loadImage("etc/heart.png")
   coin.resize(32, 0)
 
   spread
 
-  val button1 = Button("Level 1", 640, 400, 80, 32)
-  val button2 = Button("Level 2", 640, 450, 80, 32)
-  val button3 = Button("Level 3", 640, 500, 80, 32)
+  private val button1 = Button("Level 1", 640, 400, 80, 32)
+  private val button2 = Button("Level 2", 640, 450, 80, 32)
+  private val button3 = Button("Level 3", 640, 500, 80, 32)
   
 
   override def setup(): Unit = {
@@ -42,10 +42,10 @@ object Main extends PApplet {
   }
 
   override def draw(): Unit = {
-    if (!paused) {
+    if (!paused && !gameOver) {
       drawLevel(cl)
     }
-    if (levels(cl).isDone) {
+    if (levels(cl).isDone || gameOver) {
       button1.draw()
       button2.draw()
       button3.draw()
@@ -73,7 +73,7 @@ object Main extends PApplet {
       selectedTower = tower
     }
     
-    if (levels(cl).isDone) {
+    if (levels(cl).isDone || gameOver) {
       if (button1.mouseIsOver) {
         reload(1)
       } else if (button2.mouseIsOver) {
@@ -104,8 +104,9 @@ object Main extends PApplet {
       rot(e)
       drawHealth(e)
     }
+    
     towers.foreach { t =>
-      drawRange(t)
+      drawRange(t) // draw all the ranges for the towers first so they won't hide other towers behind them
     }
     towers.foreach { t =>
       rot(t)
@@ -120,10 +121,15 @@ object Main extends PApplet {
 
     if (started) {
       cw.getEnemies.foreach(e => e.move)
+      cw.getEnemies.filter(e => e.isAtEndOfPath && !e.counted).foreach { e => 
+        e.counted = true
+        player.lives -= e.livesWorth
+      }
       towers.foreach { t =>
         val deadBefore = cw.getEnemies.filter(_.dead)
         val dmg = t.shoot
         val deadAfter = cw.getEnemies.filter(_.dead)
+        stroke(255, 0, 0)
         if (dmg != 0.0) line(t.x, t.y, t.lastTarget.x.toFloat, t.lastTarget.y.toFloat)
         val died = (deadAfter.toSet -- deadBefore).toVector
         if (died.size >= 1) player.money += died(0).moneyWorth
@@ -136,7 +142,7 @@ object Main extends PApplet {
     drawInfo
   }
   
-  def drawInfo = {
+  private def drawInfo = {
     image(coin, 17, 16)
     image(heart, 17, 48)
     textAlign(LEFT, TOP)
@@ -147,7 +153,7 @@ object Main extends PApplet {
     text(player.lives, 50, 48)
   }
   
-  def drawTowerInfo(t: Tower) = {
+  private def drawTowerInfo(t: Tower) = {
     textAlign(RIGHT, TOP)
     textSize(20)
     fill(255)
@@ -159,14 +165,11 @@ object Main extends PApplet {
   /** Rotates the given enemy around it's center point */
   private def rot(e: Enemy): Unit = {
     translate(e.x, e.y)
-    rotate((e.speed.theta + Pi).toFloat)
-    rotate(Pi.toFloat)
-    translate(-e.x, -e.y)
+    rotate((e.speed.theta).toFloat)
     imageMode(CENTER)
-    image(pics(e.etype), e.x, e.y)
+    image(pics(e.etype), 0, 0)
     imageMode(CORNER)
-    translate(e.x, e.y)
-    rotate(-(e.speed.theta + 2 * Pi).toFloat)
+    rotate(-(e.speed.theta).toFloat)
     translate(-e.x, -e.y)
   }
 
@@ -176,10 +179,8 @@ object Main extends PApplet {
     translate(t.x, t.y)
     rotate(t.theta)
     rotate((Pi / 2).toFloat)
-    translate(-t.x, -t.y)
-    image(turret, t.x, t.y)
+    image(turret, 0, 0)
     imageMode(CORNER)
-    translate(t.x, t.y)
     rotate(-(t.theta + (Pi / 2).toFloat))
     translate(-t.x, -t.y)
   }
