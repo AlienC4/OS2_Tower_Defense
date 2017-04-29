@@ -5,7 +5,9 @@ case class Enemy(initHealth: Double, var speed: Vector2D, var pos: Vector2D, mon
   private var path: Path = null
   private var currentNode: Int = 0
   private val distance = 8
+  private val mass = 15
   private var maxSpeed: Double = 1.0
+  var counted = false
 
   var health = initHealth
 
@@ -24,14 +26,13 @@ case class Enemy(initHealth: Double, var speed: Vector2D, var pos: Vector2D, mon
   def getPath = this.path
   def setPath(p: Path) = this.path = p
   def setMaxSpeed(s: Double) = maxSpeed = s
-  def setPos(v: Vector2D) = this.pos = v
-  def getPos = this.pos
+  def setPos(v: Vector2D) = this.pos = v // Makes setting the current position a little easier and cleaner
 
   /** Returns a vector pointing to the given target */
   def desiredVelocity(target: Vector2D) = (target - this.pos).unit * this.speed.r
   /** Steers towards the given target */
   def steering(target: Vector2D) = {
-    (this.desiredVelocity(target) - this.speed) / 15
+    (this.desiredVelocity(target) - this.speed) / mass
   }
 
   /** Moves the enemy towards the targeted node */
@@ -40,7 +41,6 @@ case class Enemy(initHealth: Double, var speed: Vector2D, var pos: Vector2D, mon
       val target = this.path(cn)
       this.speed += this.steering(target)
       if (target.isWithin(32, this.pos) && this.speed.r * 1.05 >= maxSpeed) this.speed *= 0.8 else this.speed *= 1.05
-      
       this.speed = trunc(this.speed, maxSpeed)
       this.pos += this.speed
       if (target.isWithin(distance, this.pos) && this.cn < this.path.length) {
@@ -52,8 +52,4 @@ case class Enemy(initHealth: Double, var speed: Vector2D, var pos: Vector2D, mon
   def x = this.pos.x.toFloat
   def y = this.pos.y.toFloat
 
-}
-
-trait Flying {
-  val flying = true
 }
