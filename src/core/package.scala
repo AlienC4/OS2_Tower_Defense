@@ -17,7 +17,7 @@ package object core {
     var lives = 0
     def enemies = Map("type1" -> loadEnemy("type1"), 
                       "type2" -> loadEnemy("type2"),
-                      "type3" -> loadEnemy("type3")) // only three possible enemy types currently
+                      "type3" -> loadEnemy("type3")) // new enemytypes are added here
 
     try {
       val file = new FileReader(s"levels/$level.level")
@@ -217,6 +217,6 @@ package object core {
   
   def trunc(v: Vector2D, s: Double): Vector2D = if (v.r > s) v.unit * s else v
 
-  class CorruptedTDFileException(message: String) extends Exception(message)
+  private class CorruptedTDFileException(message: String) extends Exception(message)
 }
 
