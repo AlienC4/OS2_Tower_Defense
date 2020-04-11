@@ -1,3 +1,6 @@
+This is a small tower defense game I made as a project for a Scala course
+
+
 The readme file for the tower defense game. 
 
 The §-sign marks the beginning of a comment in the files used in this game.
